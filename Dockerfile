@@ -1,6 +1,5 @@
 FROM php:8.2-fpm
 
-# Instalar dependencias necesarias para Laravel
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -11,20 +10,21 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     && docker-php-ext-install pdo pdo_mysql zip
 
-# Instalar Composer
+# Copiar Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copiar archivos del proyecto
+# Set working directory
 WORKDIR /var/www/html
+
+# Copiar proyecto
 COPY . .
 
-# Instalar dependencias de Laravel
+# Instalar dependencias Laravel
 RUN composer install --no-dev --optimize-autoloader
 
-# Dar permisos
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Dar permisos a storage
+RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Puerto que escucha PHP-FPM
-EXPOSE 9000
+EXPOSE 8080
 
-CMD ["php-fpm"]
+CMD [ "php-fpm" ]
